@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <!--suppress JSUnresolvedLibraryURL -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+
+    {% block css %}{% endblock %}
+</head>
+
+<body>
+    <div class="ui segment">
+        <div class="ui text menu">
+            <div class="item">
+                <h2><a href="/" style="color: black;"><i class="cloud icon"></i>Yuhi's Netdisk</a></h2>
+            </div>
+            <div class="menu right">
+                <div class="item">
+                    {% if request.user.is_authenticated %}
+                        <div class="ui inline dropdown">
+                            <div class="text">
+                                <h3><i class="user secret icon"></i>{{ request.user.username }}</h3>
+                            </div>
+                            <i class="dropdown icon"></i>
+                            <div class="menu">
+                                <a href="/logout/" class="item"><i class="power off icon"></i>退出</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <button type="button" class="ui button login"><i class="paper plane icon"></i>登录</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui basic segment content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div class="ui mini modal login">
+        <div class="header">
+            用户登录
+        </div>
+        <div class="content">
+            <form id="login_form" action="/login/" class="ui form" method="POST" autocomplete="off">
+                {% csrf_token %}
+                {% for field in login_form %}
+                    <div class="field">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                {% endfor %}
+                <div class="actions">
+                    <button type="button" class="ui black deny left button">取消</button>
+                    <button type="submit" class="ui submit green right button" style="float:right;">登录</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>
+            <i class="copyright outline icon"></i>&nbsp;2020&nbsp;
+            <a href="https://yuhi.xyz/" target="_blank">Yuhi</a>
+        </div>
+    </div>
+
+    <!--suppress JSUnresolvedLibraryURL -->
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+    <!--suppress JSUnresolvedLibraryURL -->
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    <script type="text/javascript">
+        // login modal
+        $('.ui.button.login').on('click', function() {
+            $('.ui.mini.modal.login').modal('show');
+            $('#login_form')[0].reset();
+        });
+        // login dropdown menu
+        $('.ui.inline.dropdown').dropdown();
+    </script>
+
+    {% block js %}{% endblock %}
+</body>
+
+</html>
