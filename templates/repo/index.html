@@ -61,14 +61,19 @@
                 <td>{{ item.update_datetime }}</td>
                 <td>{{ item.update_user }}</td>
                 <td>
-                    <a><i class="cloud download icon"></i>下载</a>
-                    <a><i class="trash alternate icon"></i>删除</a>
+                    {% if item.file_type == 1 %}
+                        <a href="javascipt:void(0)"><i class="cloud download icon"></i></a>
+                    {% else %}
+                        <a class="item renamedir" id="find-fid" data-fname="{{ item.name }}" data-fid="{{ item.id }}" href="javascipt:void(0)"><i class="edit icon"></i></a>
+                    {% endif %}
+                    <a href="javascipt:void(0)"><i class="trash alternate icon"></i></a>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
+    <!-- 新建文件夹 -->
     <div class="ui mini modal mkdir">
         <div class="header">
             新建目录
@@ -76,7 +81,7 @@
         <div class="content">
             <form class="ui form" id="mkdir_form">
                 {% csrf_token %}
-                {% for field in mkdir_form %}
+                {% for field in dir_form %}
                     <div class="field">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
@@ -84,7 +89,7 @@
                 {% endfor %}
                 <div class="actions">
                     <button type="button" class="ui black deny left button">取消</button>
-                    <button type="submit" id="bth_mkdir_form_submit" class="ui submit green right button"
+                    <button id="bth_mkdir_form_submit" class="ui green right button"
                             style="float:right;">确认
                     </button>
                 </div>
@@ -92,27 +97,84 @@
         </div>
     </div>
 
+    <!-- 重命名文件夹 -->
+    <div class="ui mini modal rndir">
+        <div class="header">
+            重命名
+        </div>
+        <div class="content">
+            <form class="ui form" id="rndir_form">
+                {% csrf_token %}
+                <input type="text" name="fid" id="fid" style="display: none" value="" />
+                {% for field in dir_form %}
+                    <div class="field">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                {% endfor %}
+                <div class="actions">
+                    <button type="button" class="ui black deny left button">取消</button>
+                    <button id="bth_rndir_form_submit" class="ui submit green right button"
+                            style="float:right;">确认
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 删除文件（夹） -->
+
+    <!-- 下载文件 -->
+
+
 
 {% endblock %}
 
 {% block js %}
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
     <script type="text/javascript">
+        // mkdir modal
+        $('.item.mkdir').on('click', function () {
+            $('.ui.mini.modal.mkdir').modal('show');
+            $('#mkdir_form')[0].reset();
+        });
+        // upload file modal
+
+        // rmdir modal
+
+        // rndir modal
+        $('.item.renamedir').on('click', function () {
+            // 先取得当前重命名的文件夹的id（已经预存在对应文件夹的重命名按钮上）
+            fid_value = $(this).data('fid'); // 全局变量，获取该对象的data-fid值
+            fname = $(this).data('fname'); // 获得原文件夹名
+            // 把fid_value赋值给隐藏的input的value，在提交表单POST时传给后台
+            $('#fid').val(fid_value);
+            $('.ui.mini.modal.rndir').modal('show');
+            // 将fname写到输出框上，注意本页面有多个表单，不能直接直接通过input框的id="id_name"查找
+            $("#rndir_form input[id=id_name]").val(fname);
+        });
+        // mkdir submit
         $('#bth_mkdir_form_submit').on('click', function () {
+            formPost('#mkdir_form');
+        });
+        // rndir submit
+        $('#bth_rndir_form_submit').on('click', function () {
+            formPost('#rndir_form');
+        });
+        function formPost(form_id) {
             $.ajax({
                 url: location.href,
                 type: 'POST',
-                data: $('#mkdir_form').serialize(),
+                data: $(form_id).serialize(),
                 dataType: 'JSON',
                 success: function (res) {
                     if (res.status) {
                         location.href = location.href;
-                        console.log('-------------------------------------------');
                     } else {
                         console.log(res);
                     }
                 }
             });
-        });
+        }
     </script>
 {% endblock %}

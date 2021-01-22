@@ -2,7 +2,7 @@ from django import forms
 from .models import FileRepository
 
 
-class MakeDirectoryForm(forms.ModelForm):
+class DirectoryForm(forms.ModelForm):
     class Meta:
         model = FileRepository
         fields = ['name']

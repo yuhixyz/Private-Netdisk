@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from apps.account.form import LoginForm
-from apps.repo.form import MakeDirectoryForm
+from apps.repo.form import DirectoryForm
 from apps.repo.models import FileRepository
 
 
@@ -34,16 +34,28 @@ def index_view(request):
 
         context = {
             'login_form': LoginForm,  # 登录表单
-            'mkdir_form': MakeDirectoryForm,  # 新建目录表单
+            'dir_form': DirectoryForm,  # 目录表单
             'file_list': file_list,  # 当前目录下的所有文件（夹）对象
             'parent_object': parent_object,  # 当前目录对象
             'path': path,  # 路径导航条
         }
         return render(request, 'repo/index.html', context)
 
-    form = MakeDirectoryForm(request.POST)
+    # POST
+
+    fid = request.POST.get('fid', '')  # 只有当重命名文件夹时由隐藏input提供
+    to_be_renamed = None
+    form = None
+
+    if fid.isdecimal():  # 重命名
+        to_be_renamed = FileRepository.objects.filter(id=int(fid), update_user=request.user, file_type=2).first()
+
+    if to_be_renamed:  # 当前是需要重命名的文件夹，需要设置instance
+        form = DirectoryForm(data=request.POST, instance=to_be_renamed)
+    else:
+        form = DirectoryForm(data=request.POST)
+
     if form.is_valid():
-        # 验证通过
         form.instance.file_type = 2
         form.instance.update_user = request.user
         form.instance.parent = parent_object
