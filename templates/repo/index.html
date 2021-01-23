@@ -62,18 +62,18 @@
                 <td>{{ item.update_user }}</td>
                 <td>
                     {% if item.file_type == 1 %}
-                        <a href="javascipt:void(0)"><i class="cloud download icon"></i></a>
+                        <a style="cursor:pointer;"><i class="cloud download icon"></i></a>
                     {% else %}
-                        <a class="item renamedir" id="find-fid" data-fname="{{ item.name }}" data-fid="{{ item.id }}" href="javascipt:void(0)"><i class="edit icon"></i></a>
+                        <a class="item renamedir" id="find-fid" data-fname="{{ item.name }}" data-fid="{{ item.id }}" style="cursor:pointer;"><i class="edit icon"></i></a>
                     {% endif %}
-                    <a href="javascipt:void(0)"><i class="trash alternate icon"></i></a>
+                    <a style="cursor:pointer;"><i class="trash alternate icon"></i></a>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <!-- 新建文件夹 -->
+ <!-- 新建文件夹 -->
     <div class="ui mini modal mkdir">
         <div class="header">
             新建目录
@@ -81,6 +81,8 @@
         <div class="content">
             <form class="ui form" id="mkdir_form">
                 {% csrf_token %}
+                <input type="text" name="zanwei" style="display: none" value="" />
+                <!-- 多设置一个隐藏的input防止回车自动提交表单 -->
                 {% for field in dir_form %}
                     <div class="field">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
@@ -89,7 +91,7 @@
                 {% endfor %}
                 <div class="actions">
                     <button type="button" class="ui black deny left button">取消</button>
-                    <button id="bth_mkdir_form_submit" class="ui green right button"
+                    <button type="button" id="bth_mkdir_form_submit" class="ui green right button"
                             style="float:right;">确认
                     </button>
                 </div>
@@ -114,7 +116,7 @@
                 {% endfor %}
                 <div class="actions">
                     <button type="button" class="ui black deny left button">取消</button>
-                    <button id="bth_rndir_form_submit" class="ui submit green right button"
+                    <button type="button" id="bth_rndir_form_submit" class="ui green right button"
                             style="float:right;">确认
                     </button>
                 </div>
@@ -136,7 +138,8 @@
         // mkdir modal
         $('.item.mkdir').on('click', function () {
             $('.ui.mini.modal.mkdir').modal('show');
-            $('#mkdir_form')[0].reset();
+            $('#mkdir_form')[0].reset();  // 清空
+            $('#mkdir_form input[id=id_name]')[0].autocomplete='off';  // 不显示历史
         });
         // upload file modal
 
@@ -150,8 +153,9 @@
             // 把fid_value赋值给隐藏的input的value，在提交表单POST时传给后台
             $('#fid').val(fid_value);
             $('.ui.mini.modal.rndir').modal('show');
+            $('#rndir_form input[id=id_name]')[0].autocomplete='off';  // 不显示历史
             // 将fname写到输出框上，注意本页面有多个表单，不能直接直接通过input框的id="id_name"查找
-            $("#rndir_form input[id=id_name]").val(fname);
+            $('#rndir_form input[id=id_name]')[0].value = fname;
         });
         // mkdir submit
         $('#bth_mkdir_form_submit').on('click', function () {
