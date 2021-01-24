@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,7 +7,7 @@
     <title>{% block title %}{% endblock %}</title>
     <!--suppress JSUnresolvedLibraryURL -->
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
-
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
     {% block css %}{% endblock %}
 </head>
 
@@ -53,9 +54,9 @@
                         {{ field }}
                     </div>
                 {% endfor %}
-                <div class="actions">
-                    <button type="button" class="ui black deny left button">取消</button>
-                    <button type="submit" class="ui submit green right button" style="float:right;">登录</button>
+                <div class="actions" style="text-align: right;">
+                    <button type="button" class="ui grey deny button">取消</button>
+                    <button type="submit" class="ui submit green button">登录</button>
                 </div>
             </form>
         </div>
