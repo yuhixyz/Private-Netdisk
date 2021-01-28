@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'lolololololololol'  # 请修改这里~
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -113,7 +113,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+# 执行 python manage.py collectstatic 后会将 STATICFILES_DIRS 以及其他 apps 下的static 中静态文件归类到 STATIC_ROOT 目录下
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'staticfiles'),
+# 添加额外的静态文件查找路径
+# 在项目根目录下创建 staticfiles 文件夹作为开发阶段使用的静态文件
+STATICFILES_DIRS = (  
+    os.path.join(BASE_DIR, 'staticfiles'), 
 )
+
+# 腾讯对象存储
+COS_SECRET_ID = ''
+COS_SECRET_KEY = ''
+APPID = ''
