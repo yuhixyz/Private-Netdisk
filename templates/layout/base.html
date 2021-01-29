@@ -5,8 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
-    <!--suppress JSUnresolvedLibraryURL -->
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+
+    <link rel="stylesheet" href="{% static 'plugin/semantic-ui/semantic.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     {% block css %}{% endblock %}
 </head>
@@ -69,10 +69,8 @@
         </div>
     </div>
 
-    <!--suppress JSUnresolvedLibraryURL -->
-    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
-    <!--suppress JSUnresolvedLibraryURL -->
-    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'plugin/semantic-ui/semantic.min.js' %}"></script>
     <script type="text/javascript">
         // login modal
         $('.ui.button.login').on('click', function() {

@@ -2,9 +2,13 @@ from qcloud_cos import CosConfig
 from qcloud_cos import CosS3Client
 from qcloud_cos.cos_exception import CosServiceError
 from settings.dev import COS_SECRET_ID, COS_SECRET_KEY
+from sts.sts import Sts
 
 
 def exist_bucket(bucket, region):
+    """
+    bucket存在返回True
+    """
     config = CosConfig(Region=region, SecretId=COS_SECRET_ID, SecretKey=COS_SECRET_KEY)
     client = CosS3Client(config)
     response = client.list_buckets()
@@ -22,6 +26,9 @@ def exist_bucket(bucket, region):
 
 
 def create_bucket(bucket, region='ap-nanjing'):
+    """
+    创建桶
+    """
     config = CosConfig(Region=region, SecretId=COS_SECRET_ID, SecretKey=COS_SECRET_KEY)
     client = CosS3Client(config)
     client.create_bucket(
@@ -45,6 +52,9 @@ def create_bucket(bucket, region='ap-nanjing'):
 
 
 def upload_file(bucket, region, file_object, key):
+    """
+    上传文件
+    """
     config = CosConfig(Region=region, SecretId=COS_SECRET_ID, SecretKey=COS_SECRET_KEY)
     client = CosS3Client(config)
     client.upload_file_from_buffer(
@@ -55,7 +65,7 @@ def upload_file(bucket, region, file_object, key):
     return "https://{}.cos.{}.myqcloud.com/{}".format(bucket, region, key)
 
 
-def delete_file(bucket, region, key, ):
+def delete_file(bucket, region, key):
     config = CosConfig(Region=region, SecretId=COS_SECRET_ID, SecretKey=COS_SECRET_KEY)
     client = CosS3Client(config)
     client.delete_object(
@@ -66,11 +76,8 @@ def delete_file(bucket, region, key, ):
 
 def delete_file_list(bucket, region, key_list):
     """
-    COS批量删除文件
-    :param bucket:
-    :param key_list:
-    :param region:
-    :return:
+    删除文件列表
+    key_list是一个字典
     """
     config = CosConfig(Region=region, SecretId=COS_SECRET_ID, SecretKey=COS_SECRET_KEY)
     client = CosS3Client(config)
@@ -86,15 +93,13 @@ def delete_file_list(bucket, region, key_list):
     )
 
 
-def credential(bucket, region):
-    """ 获取cos上传临时凭证 """
-    from sts.sts import Sts
+def get_credential(bucket, region):
+    """ 获取临时凭证 """
     config = {
-        # 临时密钥有效时长，单位是秒（30分钟=1800秒）
-        'duration_seconds': 5,
-        # 固定密钥 id
+        # 临时密钥有效时长，单位是秒
+        'duration_seconds': 300,
         'secret_id': COS_SECRET_ID,
-        # 固定密钥 key
+        # 固定密钥
         'secret_key': COS_SECRET_KEY,
         # 换成你的 bucket
         'bucket': bucket,
@@ -105,14 +110,16 @@ def credential(bucket, region):
         'allow_prefix': '*',
         # 密钥的权限列表。简单上传和分片需要以下的权限，其他权限列表请看 https://cloud.tencent.com/document/product/436/31923
         'allow_actions': [
-            # "name/cos:PutObject",
+            # # 简单上传
+            # 'name/cos:PutObject',
             # 'name/cos:PostObject',
-            # 'name/cos:DeleteObject',
-            # "name/cos:UploadPart",
-            # "name/cos:UploadPartCopy",
-            # "name/cos:CompleteMultipartUpload",
-            # "name/cos:AbortMultipartUpload",
-            "*",
+            # # 分片上传
+            # 'name/cos:InitiateMultipartUpload',
+            # 'name/cos:ListMultipartUploads',
+            # 'name/cos:ListParts',
+            # 'name/cos:UploadPart',
+            # 'name/cos:CompleteMultipartUpload',
+            '*',
         ],
     }
     sts = Sts(config)

@@ -3,7 +3,16 @@
 
 {% block title %}Yuhi's Netdisk{% endblock %}
 
-{% block css %}{% endblock %}
+{% block css %}
+    <style>
+        #uploadProgress {
+            position: fixed;
+            right: 5px;
+            bottom: 5px;
+            width: 400px;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
     <div class="ui menu">
@@ -21,7 +30,10 @@
             <a class="item" href="{% url 'home' %}?folder={{ item.id }}">{{ item.name }}</a>
         {% endfor %}
         <div class="right menu">
-            <a class="item upload"><i class="cloud upload icon"></i>上传文件</a>
+            <a class="item upload">
+                <i class="cloud upload icon"></i>上传文件
+                <input id="upload" multiple type="file" style="opacity: 0; position: absolute;"/>
+            </a>
             <a class="item mkdir"><i class="plus circle icon"></i>新建目录</a>
         </div>
     </div>
@@ -36,18 +48,19 @@
             <th>操作</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="repoList">
         {% for item in file_list %}
             <tr>
                 <td>
-                    <a href="{% url 'home' %}?folder={{ item.id }}">
-                        {% if item.file_type == 2 %}
+                    {% if item.file_type == 2 %}
+                        <a href="{% url 'home' %}?folder={{ item.id }}">
                             <i class="folder icon"></i>
-                        {% else %}
-                            <i class="file alternate icon"></i>
-                        {% endif %}
+                            {{ item.name }}
+                        </a>
+                    {% else %}
+                        <i class="file alternate icon"></i>
                         {{ item.name }}
-                    </a>
+                    {% endif %}
                 </td>
                 <td>
                     {% if item.file_type == 1 %}
@@ -60,7 +73,8 @@
                 <td>{{ item.update_user }}</td>
                 <td>
                     {% if item.file_type == 1 %}
-                        <a style="cursor:pointer;"><i class="cloud download icon"></i></a>
+                        <a style="cursor:pointer;" href="{{ item.file_path }}" target="_blank"><i
+                                class="cloud download icon"></i></a>
                     {% else %}
                         <a class="item rndir" id="find-fid" data-fname="{{ item.name }}" data-fid="{{ item.id }}"
                            style="cursor:pointer;"><i class="edit icon"></i></a>
@@ -136,21 +150,144 @@
 
     <!-- 下载文件 -->
 
+    <!-- 上传进度条 -->
+    <div hidden id="uploadProgress" class="ui raised segment">
+        <table class="ui one column blue table" rules=none>
+            <tbody id="progressList"></tbody>
+        </table>
+    </div>
+
+    <!-- 进度条模板 -->
+    <table hidden id="progressTemplate" class="ui table">
+        <tr>
+            <td>
+                <div class="ui active progress">
+                    <div class="bar" style="width: 0%;">
+                        <div class="progress">0%</div>
+                    </div>
+                    <div class="label">上传的文件名</div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- 仓库信息模板 -->
+    <table id="repoTemplate" class="ui table">
+        <tr>
+            <td>
+                <i class="file alternate icon"></i>
+                <span class="name">文件名</span>
+            </td>
+            <td class="file_size">大小</td>
+            <td class="update_datetime">修改时间</td>
+            <td class="update_user">所有者</td>
+            <td>
+                <a class="item dlfile" style="cursor:pointer;" href="" target="_blank">
+                    <i class="cloud download icon"></i>
+                </a>
+                <a class="item rmfile" data-fid="" style="cursor:pointer;">
+                    <i class="trash alternate icon"></i>
+                </a>
+            </td>
+        </tr>
+    </table>
 
 {% endblock %}
 
 {% block js %}
-    <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/cos-js-sdk-v5.min.js' %}"></script>
     <script type="text/javascript">
+        // cos授权
+        var cos_credential = new COS({
+            getAuthorization: function (options, callback) {
+                var COS_CREDENTIAL = "{% url 'credential' %}";
+                $.get(COS_CREDENTIAL, function (res) {
+                    if (res.status) {
+                        var credentials = res.data && res.data.credentials;
+                        if (!res.data || !credentials) return console.error('credentials invalid');
+                        callback({
+                            TmpSecretId: credentials.tmpSecretId,
+                            TmpSecretKey: credentials.tmpSecretKey,
+                            XCosSecurityToken: credentials.sessionToken,
+                            StartTime: res.data.startTime,
+                            ExpiredTime: res.data.expiredTime
+                        });
+                        // 授权通过，展示进度条
+                        $('#uploadProgress').removeAttr('hidden');
+                    } else {
+                        alert('未获得授权，请刷新重试~');
+                    }
+                })
+            }
+        });
+
+        // 上传文件
+        $('#upload').on('change', function () {
+            $('#progressList').empty();
+            var file_list = $(this)[0].files;
+            $.each(file_list, function (index, value) {
+                var name = value.name;
+                var file_size = value.size;
+                var key = (new Date()).getTime() + "_" + name;  // 存储在cos中的key
+                // 每取出一个文件，增加一个进度条
+                var $tr = $('#progressTemplate').find('tr').clone();
+                $tr.find('.label').text(name);
+                $('#progressList').append($tr);
+                // 上传文件
+                cos_credential.putObject({
+                    Bucket: '{{ request.user.bucket }}',
+                    Region: '{{ request.user.region }}',
+                    Key: key,
+                    Body: value,  // 文件对象
+                    onProgress: function (progressData) {
+                        {#console.log(progressData);#}
+                        var percent = progressData.percent * 100 + '%';  // 获取进度条百分比
+                        $bar = $tr.find('.bar');
+                        $bar.find('.progress').text(percent);
+                        $bar.css('width', percent);  // 更新进度条
+                    }
+                }, function (err, data) {
+                    console.log(err || data);
+                    if (data && data.statusCode == 200) {  // 上传成功
+                        var parent_id = '{{ parent_object.id }}';  // 父级目录
+                        // 写入数据库
+                        $.ajax({
+                            url: "{% url 'file_save' %}",
+                            type: 'POST',
+                            data: {
+                                'name': name,
+                                'file_size': file_size,
+                                'key': key,
+                                'parent_id': parent_id,
+                                'file_path': 'https://' + data.Location,
+                            },
+                            success: function (res) {  // 数据库写入成功
+                                var $new_tr = $('#repoTemplate').find('tr').clone();
+                                $new_tr.find('.name').text(res.data.name);
+                                $new_tr.find('.update_user').text(res.data.update_user);
+                                $new_tr.find('.file_size').text(res.data.file_size);
+                                $new_tr.find('.update_datetime').text(res.data.update_datetime);
+                                $new_tr.find('.item.dlfile').attr('href', res.data.file_path);
+                                $new_tr.find('.item.rmfile').attr('data-fid', res.data.id);
+                                // 将新行动态添加回表格 #repoList
+                                $('#repoList').append($new_tr);
+                                // 进度条移除
+                                $tr.remove();
+                            }
+                        });
+                    } else {
+                        alert("上传失败，请重试！");
+                    }
+                });
+            });
+        });
+
         // 新建文件夹 modal
         $('.item.mkdir').on('click', function () {
             $('.ui.mini.modal.mkdir').modal('show');
             $('#mkdir_form')[0].reset();  // 清空
             $('#mkdir_form input[id=id_name]')[0].autocomplete = 'off';  // 不显示历史
         });
-
-        // 上传文件 modal
-
 
         // 重命名文件夹 modal
         $('.item.rndir').on('click', function () {
@@ -165,14 +302,23 @@
             $('#rndir_form input[id=id_name]')[0].value = fname_value;
         });
 
-        // 删除文件（夹） modal
-        $('.item.rmfile').on('click', function () {
+        // 删除文件（夹） modal（jquery动态append的元素要响应事件必须如下写法）
+        $(document).on('click','.item.rmfile',function() {
             // 获取要删除的文件（夹）的id
             var fid_value = $(this).data('fid');
             $('.ui.mini.modal.rmfile').modal('show');
             // 将fid_value写到确定button上
             $('#bth_rmfile_submit').attr('data-fid', fid_value);
         });
+
+        // 删除文件（夹） modal
+        {#$('.item.rmfile').on('click', function () {#}
+        {#    // 获取要删除的文件（夹）的id#}
+        {#    var fid_value = $(this).data('fid');#}
+        {#    $('.ui.mini.modal.rmfile').modal('show');#}
+        {#    // 将fid_value写到确定button上#}
+        {#    $('#bth_rmfile_submit').attr('data-fid', fid_value);#}
+        {#});#}
 
         // 新建文件夹表单提交
         $('#bth_mkdir_form_submit').on('click', function () {
@@ -219,5 +365,6 @@
                 }
             });
         }
+
     </script>
 {% endblock %}

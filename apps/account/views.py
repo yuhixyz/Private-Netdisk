@@ -12,7 +12,6 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            # 创建用户对应的bucket
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             user = authenticate(username=username, password=password)
@@ -22,9 +21,8 @@ def login_view(request):
                 region = user.region
                 if not exist_bucket(bucket, region):  # 桶不存在
                     create_bucket(bucket=bucket, region=user.region)  # 创建桶
-                    MyUser.objects.filter(id=user.id).update(bucket=bucket)
+                    MyUser.objects.filter(id=user.id).update(bucket=bucket)  # 写入数据库
 
-                    # 写入数据库
     return HttpResponseRedirect(reverse('home'))  # 返回首页
 
 
