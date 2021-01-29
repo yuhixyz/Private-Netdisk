@@ -12,61 +12,65 @@
 </head>
 
 <body>
-    <div class="ui segment">
-        <div class="ui text menu">
-            <div class="item">
-                <h2><a href="/" style="color: black;"><i class="cloud icon"></i>Yuhi's Netdisk</a></h2>
-            </div>
-            <div class="menu right">
+    <div class="wrapper">
+
+        <div class="ui segment">
+            <div class="ui text menu">
                 <div class="item">
-                    {% if request.user.is_authenticated %}
-                        <div class="ui inline dropdown">
-                            <div class="text">
-                                <h3><i class="user secret icon"></i>{{ request.user.username }}</h3>
+                    <h2><a href="/" style="color: black;"><i class="cloud icon"></i>Yuhi's Netdisk</a></h2>
+                </div>
+                <div class="menu right">
+                    <div class="item">
+                        {% if request.user.is_authenticated %}
+                            <div class="ui inline dropdown">
+                                <div class="text">
+                                    <h3><i class="user secret icon"></i>{{ request.user.username }}</h3>
+                                </div>
+                                <i class="dropdown icon"></i>
+                                <div class="menu">
+                                    <a href="/logout/" class="item"><i class="power off icon"></i>退出</a>
+                                </div>
                             </div>
-                            <i class="dropdown icon"></i>
-                            <div class="menu">
-                                <a href="/logout/" class="item"><i class="power off icon"></i>退出</a>
-                            </div>
-                        </div>
-                    {% else %}
-                        <button type="button" class="ui button login"><i class="paper plane icon"></i>登录</button>
-                    {% endif %}
+                        {% else %}
+                            <button type="button" class="ui button login"><i class="paper plane icon"></i>登录</button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="ui basic segment content">
-        {% block content %}{% endblock %}
-    </div>
-
-    <div class="ui mini modal login">
-        <div class="header">
-            用户登录
+        <div class="ui basic segment content">
+            {% block content %}{% endblock %}
         </div>
-        <div class="content">
-            <form id="login_form" action="/login/" class="ui form" method="POST" autocomplete="off">
-                {% csrf_token %}
-                {% for field in login_form %}
-                    <div class="field">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
+
+        <div class="ui mini modal login">
+            <div class="header">
+                用户登录
+            </div>
+            <div class="content">
+                <form id="login_form" action="/login/" class="ui form" method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    {% for field in login_form %}
+                        <div class="field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    {% endfor %}
+                    <div class="actions" style="text-align: right;">
+                        <button type="button" class="ui grey deny button">取消</button>
+                        <button type="submit" class="ui submit green button">登录</button>
                     </div>
-                {% endfor %}
-                <div class="actions" style="text-align: right;">
-                    <button type="button" class="ui grey deny button">取消</button>
-                    <button type="submit" class="ui submit green button">登录</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <div class="footer">
-        <div>
-            <i class="copyright outline icon"></i>&nbsp;2020&nbsp;
-            <a href="https://yuhi.xyz/" target="_blank">Yuhi</a>
+        <div class="footer">
+            <div>
+                <i class="copyright outline icon"></i>&nbsp;2020&nbsp;
+                <a href="https://yuhi.xyz/" target="_blank">Yuhi</a>
+            </div>
         </div>
+
     </div>
 
     <script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
