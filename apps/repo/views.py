@@ -35,9 +35,10 @@ def delete_view(request):
                     q.append(file)
                     tt += 1
 
-        # 批量删除文件
-        delete_file_list(bucket=request.user.bucket, region=request.user.region, key_list=key_list)
-        # 删除文件夹
+        if key_list:
+            # cos批量删除文件
+            delete_file_list(bucket=request.user.bucket, region=request.user.region, key_list=key_list)
+        # 在数据库中删除文件夹
         delete_object.delete()
 
     return JsonResponse({'status': True})

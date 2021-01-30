@@ -12,12 +12,13 @@ def exist_bucket(bucket, region):
     config = CosConfig(Region=region, SecretId=COS_SECRET_ID, SecretKey=COS_SECRET_KEY)
     client = CosS3Client(config)
     response = client.list_buckets()
-    # print(response)
-    bucket_list = None
-    for key, value in response.items():
-        if key == 'Buckets':
-            bucket_list = value['Bucket']
 
+    # print(response)
+    buckets = response['Buckets']
+    if not buckets:
+        return False
+
+    bucket_list = buckets['Bucket']
     for item in bucket_list:
         if item['Name'] == bucket:
             return True

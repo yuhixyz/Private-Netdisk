@@ -273,6 +273,7 @@
                                 'parent_id': parent_id,
                                 'file_path': 'https://' + data.Location,
                             },
+                            dataType: 'JSON',
                             success: function (res) {  // 数据库写入成功
                                 var $new_tr = $('#repoTemplate').find('tr').clone();
                                 $new_tr.find('.name').text(res.data.name);
