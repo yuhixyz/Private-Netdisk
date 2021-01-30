@@ -3,6 +3,7 @@ from django.urls import path
 from apps.views import index_view
 from apps.account.views import login_view, logout_view
 from apps.repo.views import delete_view, credential_view, file_save_view
+from django.views.generic.base import RedirectView
 
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('delete/', delete_view, name='delete'),
     path('credential/', credential_view, name='credential'),
     path('file_save/', file_save_view, name='file_save'),
+    path('favicon.ico', RedirectView.as_view(url='static/img/favicon.ico')),
 ]

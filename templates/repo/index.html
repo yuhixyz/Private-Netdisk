@@ -1,10 +1,22 @@
 {% extends "layout/base.html" %}
 {% load static %}
 
-{% block title %}Yuhi's Netdisk{% endblock %}
+{% block title %}Netdisk{% endblock %}
 
 {% block css %}
     <style>
+        #upload {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            font-size: 0;
+            cursor:pointer;
+        }
         #uploadProgress {
             position: fixed;
             right: 5px;
@@ -32,9 +44,9 @@
         <div class="right menu">
             <a class="item upload">
                 <i class="cloud upload icon"></i>上传文件
-                <input id="upload" multiple type="file" style="opacity: 0; position: absolute;"/>
+                <input id="upload" multiple type="file" />
             </a>
-            <a class="item mkdir"><i class="plus circle icon"></i>新建目录</a>
+            <a class="item mkdir"><i class="plus icon"></i>新建目录</a>
         </div>
     </div>
 
@@ -43,7 +55,7 @@
         <tr>
             <th>文件名</th>
             <th>大小</th>
-            <th>修改时间</th>
+            <th>上传时间</th>
             <th>所有者</th>
             <th>操作</th>
         </tr>
@@ -144,7 +156,7 @@
         </div>
         <div class="actions" style="text-align: right;">
             <button type="button" class="ui grey deny button">取消</button>
-            <button type="button" id="bth_rmfile_submit" class="ui blue button">确认</button>
+            <button type="button" id="bth_rmfile_submit" class="ui light red button">确认</button>
         </div>
     </div>
 
