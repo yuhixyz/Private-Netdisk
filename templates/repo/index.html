@@ -259,7 +259,7 @@
                         $bar.css('width', percent);  // 更新进度条
                     }
                 }, function (err, data) {
-                    console.log(err || data);
+                    {#console.log(err || data);#}
                     if (data && data.statusCode == 200) {  // 上传成功
                         var parent_id = '{{ parent_object.id }}';  // 父级目录
                         // 写入数据库
@@ -272,6 +272,7 @@
                                 'key': key,
                                 'parent_id': parent_id,
                                 'file_path': 'https://' + data.Location,
+                                'csrfmiddlewaretoken': '{{ csrf_token }}'
                             },
                             dataType: 'JSON',
                             success: function (res) {  // 数据库写入成功

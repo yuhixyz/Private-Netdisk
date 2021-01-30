@@ -3,7 +3,6 @@ from apps.repo.models import FileRepository
 from django.http import JsonResponse
 from utils.tencent.cos import delete_file, delete_file_list, upload_file, create_bucket, get_credential
 from django.views.decorators.csrf import csrf_exempt
-import locale
 
 
 def delete_view(request):
@@ -52,7 +51,6 @@ def credential_view(request):
     return JsonResponse({'status': True, 'data': data_dict})
 
 
-@csrf_exempt
 def file_save_view(request):
     """
     文件上传成功后写入数据库
@@ -74,13 +72,12 @@ def file_save_view(request):
     res = FileRepository.objects.create(file_type=file_type, file_path=file_path, name=name, file_size=file_size, key=key,
                                   parent=parent, update_user=update_user)
 
-    locale.setlocale(locale.LC_CTYPE, 'chinese')
     dict = {
         'id': res.id,
         'name': name,
         'file_size': file_size,
         'update_user': update_user.username,
         'file_path': file_path,
-        'update_datetime': res.update_datetime.strftime('%Y年%m月%d日 %H:%M'),
+        'update_datetime': res.update_datetime.strftime('%Y{y}%m{m}%d{d} %H:%M').format(y='年',m='月',d='日'),
     }
     return JsonResponse({'status': True, 'data': dict})

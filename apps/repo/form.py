@@ -6,7 +6,3 @@ class DirectoryForm(forms.ModelForm):
     class Meta:
         model = FileRepository
         fields = ['name']
-
-
-class UploadFileForm(forms.Form):
-    pass
