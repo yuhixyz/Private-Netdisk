@@ -52,7 +52,7 @@ def index_view(request):
 
     if to_be_renamed:  # 当前是需要重命名的文件夹，需要设置instance
         form = DirectoryForm(data=request.POST, instance=to_be_renamed)
-    else:
+    else:  # 新建文件夹
         form = DirectoryForm(data=request.POST)
 
     if form.is_valid():

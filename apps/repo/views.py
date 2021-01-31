@@ -2,7 +2,6 @@ from django.shortcuts import render
 from apps.repo.models import FileRepository
 from django.http import JsonResponse
 from utils.tencent.cos import delete_file, delete_file_list, upload_file, create_bucket, get_credential
-from django.views.decorators.csrf import csrf_exempt
 
 
 def delete_view(request):
@@ -56,7 +55,6 @@ def file_save_view(request):
     文件上传成功后写入数据库
     """
     # print(request.POST)
-    # form = FileRepository(data=request.POST)
     name = request.POST.get('name')
     file_size = request.POST.get('file_size')
     key = request.POST.get('key')
