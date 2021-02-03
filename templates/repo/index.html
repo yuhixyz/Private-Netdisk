@@ -15,7 +15,7 @@
             bottom: 0;
             opacity: 0;
             font-size: 0;
-            cursor:pointer;
+            cursor: pointer;
         }
         #uploadProgress {
             position: fixed;
@@ -276,12 +276,12 @@
                             url: "{% url 'file_save' %}",
                             type: 'POST',
                             data: {
-                                'name': name,
-                                'file_size': file_size,
-                                'key': key,
-                                'parent_id': parent_id,
-                                'file_path': 'https://' + data.Location,
-                                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                                name: name,
+                                file_size: file_size,
+                                key: key,
+                                parent_id: parent_id,
+                                file_path: 'https://' + data.Location,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
                             },
                             dataType: 'JSON',
                             success: function (res) {  // 数据库写入成功
@@ -355,9 +355,9 @@
             var fid_value = $('#bth_rmfile_form_submit').data('fid');
             {#console.log(fid_value);#}
             $.ajax({
-                url: '{% url 'delete' %}',
+                url: "{% url 'delete' %}",
                 type: 'GET',
-                data: {'did': fid_value},  // delete_id
+                data: {did: fid_value},  // delete_id
                 dataType: 'JSON',
                 success: function (res) {
                     if (res.status) {
