@@ -261,14 +261,14 @@
                     Key: key,
                     Body: value,  // 文件对象
                     onProgress: function (progressData) {
-                        {#console.log(progressData);#}
+                        // console.log(progressData);
                         var percent = progressData.percent * 100 + '%';  // 获取进度条百分比
                         $bar = $tr.find('.bar');
                         $bar.find('.progress').text(percent);
                         $bar.css('width', percent);  // 更新进度条
                     }
                 }, function (err, data) {
-                    {#console.log(err || data);#}
+                    // console.log(err || data);
                     if (data && data.statusCode == 200) {  // 上传成功
                         var parent_id = '{{ parent_object.id }}';  // 父级目录
                         // 写入数据库
@@ -316,23 +316,23 @@
         // 重命名文件夹 modal
         $('.item.rndir').on('click', function () {
             // 先取得当前重命名的文件夹的id（已经预存在对应文件夹的重命名按钮上）
-            var fid_value = $(this).data('fid'); // 获取该对象的data-fid值即文件夹id
-            var fname_value = $(this).data('fname'); // 获取该对象的data-fname值即文件夹名
+            var fid_value = $(this).attr('data-fid'); // 获取该对象的data-fid值即文件夹id
+            var fname_value = $(this).attr('data-fname');; // 获取该对象的data-fname值即文件夹名
             // 把fid_value赋值给隐藏的input的value，在提交表单POST时传给后台
-            $('#fid')[0].value = fid_value;
+            $('#fid').val(fid_value);
             $('.ui.mini.modal.rndir').modal('show');  // 显示模态框
             $('#rndir_form input[id=id_name]')[0].autocomplete = 'off';  // 不显示历史
             // 将fname_value写到输出框上，注意本页面有多个表单，不能直接仅通过input框的id="id_name"查找
-            $('#rndir_form input[id=id_name]')[0].value = fname_value;
+            $('#rndir_form input[id=id_name]').val(fname_value);
         });
 
         // 删除文件（夹） modal（jquery动态append的元素要响应事件必须如下写法）
-        $(document).on('click','.item.rmfile',function() {
+        $(document).on('click','.item.rmfile', function () {
             // 获取要删除的文件（夹）的id
-            var fid_value = $(this).data('fid');
-            $('.ui.mini.modal.rmfile').modal('show');
+            var fid_value = $(this).attr('data-fid');
             // 将fid_value写到提交按钮上
             $('#bth_rmfile_form_submit').attr('data-fid', fid_value);
+            $('.ui.mini.modal.rmfile').modal('show');
         });
 
         // 新建文件夹表单ajax提交
@@ -352,8 +352,9 @@
         // 删除文件（夹）请求提交
         $('#rmfile_form').on('submit', function (event) {
             // 从提交按钮取出fid值传给后台
-            var fid_value = $('#bth_rmfile_form_submit').data('fid');
-            {#console.log(fid_value);#}
+            var fid_value = $('#bth_rmfile_form_submit').attr('data-fid');
+            // console.log(fid_value);
+            // alert(fid_value);
             $.ajax({
                 url: "{% url 'delete' %}",
                 type: 'GET',
@@ -361,7 +362,12 @@
                 dataType: 'JSON',
                 success: function (res) {
                     if (res.status) {
-                        location.href = location.href;
+                        $('.ui.mini.modal.rmfile').modal('hide');
+                        // 动态删除该行
+                        var $delete_element = $('#repoList > tr > td').find('a[data-fid="'+fid_value+'"]');
+                        var $delete_row = $delete_element.parent().parent();
+                        $delete_row.remove();
+                        console.log($delete_row);
                     } else {
                         console.log(res);
                     }
