@@ -386,7 +386,18 @@
                 dataType: 'JSON',
                 success: function (res) {
                     if (res.status) {
-                        location.href = location.href;
+                        if (form_id === '#mkdir_form') {  // 新建文件夹
+                            location.href = location.href;
+                        } else { // 重命名文件夹
+                            var new_name = $('#rndir_form').find('input[name="name"]').val();
+                            var fid_value = $('#fid').val();
+                            console.log(fid_value);
+                            var $modify_element = $('#repoList > tr > td').find('a[data-fid="'+fid_value+'"]');
+                            var $modify_row = $modify_element.parent().parent();
+                            var $modify_dir = $modify_row.find('.folder.icon').parent();
+                            $modify_dir[0].innerHTML = '<i class="folder icon"></i>'+' '+new_name;
+                            $('.ui.mini.modal.rndir').modal('hide');
+                        }
                     } else {
                         console.log(res);
                     }
